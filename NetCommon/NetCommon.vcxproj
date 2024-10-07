@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="net_common.h" />
     <ClInclude Include="net_message.h" />
+    <ClInclude Include="net_tsqueue.h" />
     <ClInclude Include="olc_net.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
