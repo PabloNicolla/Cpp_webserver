@@ -5,6 +5,13 @@ VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpp_webserver", "cpp_webserver\cpp_webserver.vcxproj", "{BDA74845-FB90-4F6D-946E-821A39B063C0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetCommon", "NetCommon\NetCommon.vcxproj", "{BA562291-D6C3-428A-9AAA-D10D722EF344}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetClient", "NetClient\NetClient.vcxproj", "{CEEA9C38-BD02-461A-A02C-91BA59E881F8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BA562291-D6C3-428A-9AAA-D10D722EF344} = {BA562291-D6C3-428A-9AAA-D10D722EF344}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +28,22 @@ Global
 		{BDA74845-FB90-4F6D-946E-821A39B063C0}.Release|x64.Build.0 = Release|x64
 		{BDA74845-FB90-4F6D-946E-821A39B063C0}.Release|x86.ActiveCfg = Release|Win32
 		{BDA74845-FB90-4F6D-946E-821A39B063C0}.Release|x86.Build.0 = Release|Win32
+		{BA562291-D6C3-428A-9AAA-D10D722EF344}.Debug|x64.ActiveCfg = Debug|x64
+		{BA562291-D6C3-428A-9AAA-D10D722EF344}.Debug|x64.Build.0 = Debug|x64
+		{BA562291-D6C3-428A-9AAA-D10D722EF344}.Debug|x86.ActiveCfg = Debug|Win32
+		{BA562291-D6C3-428A-9AAA-D10D722EF344}.Debug|x86.Build.0 = Debug|Win32
+		{BA562291-D6C3-428A-9AAA-D10D722EF344}.Release|x64.ActiveCfg = Release|x64
+		{BA562291-D6C3-428A-9AAA-D10D722EF344}.Release|x64.Build.0 = Release|x64
+		{BA562291-D6C3-428A-9AAA-D10D722EF344}.Release|x86.ActiveCfg = Release|Win32
+		{BA562291-D6C3-428A-9AAA-D10D722EF344}.Release|x86.Build.0 = Release|Win32
+		{CEEA9C38-BD02-461A-A02C-91BA59E881F8}.Debug|x64.ActiveCfg = Debug|x64
+		{CEEA9C38-BD02-461A-A02C-91BA59E881F8}.Debug|x64.Build.0 = Debug|x64
+		{CEEA9C38-BD02-461A-A02C-91BA59E881F8}.Debug|x86.ActiveCfg = Debug|Win32
+		{CEEA9C38-BD02-461A-A02C-91BA59E881F8}.Debug|x86.Build.0 = Debug|Win32
+		{CEEA9C38-BD02-461A-A02C-91BA59E881F8}.Release|x64.ActiveCfg = Release|x64
+		{CEEA9C38-BD02-461A-A02C-91BA59E881F8}.Release|x64.Build.0 = Release|x64
+		{CEEA9C38-BD02-461A-A02C-91BA59E881F8}.Release|x86.ActiveCfg = Release|Win32
+		{CEEA9C38-BD02-461A-A02C-91BA59E881F8}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
