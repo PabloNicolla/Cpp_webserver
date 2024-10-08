@@ -11,6 +11,9 @@ namespace olc
 	namespace net
 	{
 		template<typename T>
+		class server_interface;
+
+		template<typename T>
 		class connection : public std::enable_shared_from_this<connection<T>>
 		{
 		public:
@@ -25,6 +28,17 @@ namespace olc
 				: m_asioContext(asioContext), m_socket(std::move(socket)), m_qMessagesIn(qIn)
 			{
 				m_nOwnerType = parent;
+
+				if (m_nOwnerType == owner::server)
+				{
+					m_nHandshakeOut = uint64_t(std::chrono::system_clock::now().time_since_epoch().count());
+					m_nHandshakeCheck = scramble(m_nHandshakeOut);
+				}
+				else
+				{
+					m_nHandshakeIn = 0;
+					m_nHandshakeOut = 0;
+				}
 			}
 
 			virtual ~connection()
@@ -36,14 +50,16 @@ namespace olc
 			}
 
 		public:
-			void ConnectToClient(uint32_t uid = 0)
+			void ConnectToClient(olc::net::server_interface<T>* server, uint32_t uid = 0)
 			{
 				if (m_nOwnerType == owner::server)
 				{
 					if (m_socket.is_open())
 					{
 						id = uid;
-						ReadHeader();
+
+						WriteValidation();
+						ReadValidation(server);
 					}
 				}
 			}
@@ -57,7 +73,7 @@ namespace olc
 						{
 							if (!ec)
 							{
-								ReadHeader();
+								ReadValidation();
 							}
 						});
 				}
@@ -201,21 +217,92 @@ namespace olc
 				ReadHeader();
 			}
 
+			uint64_t scramble(uint64_t nInput) {
+				// Step 1: XOR with a constant
+				uint64_t out = nInput ^ 0xA5A5A5A5A5A5A5A5;
+
+				// Step 2: Bit rotation (left rotate and right rotate)
+				out = std::rotl(out, 17) ^ std::rotr(out, 23);
+
+				// Step 3: Add more randomness by shifting and XORing
+				out ^= (out << 7) | (out >> 3);
+
+				// Step 4: Another XOR with a different constant
+				out ^= 0x123456789ABCDEF0;
+
+				return out;
+			}
+
+			void WriteValidation()
+			{
+				asio::async_write(m_socket, asio::buffer(&m_nHandshakeOut, sizeof(uint64_t)),
+					[this](std::error_code ec, std::size_t length)
+					{
+						if (!ec)
+						{
+							if (m_nOwnerType == owner::client)
+							{
+								ReadHeader();
+							}
+						}
+						else
+						{
+							m_socket.close();
+						}
+					});
+			}
+
+			void ReadValidation(olc::net::server_interface<T>* server = nullptr)
+			{
+				asio::async_read(m_socket, asio::buffer(&m_nHandshakeIn, sizeof(uint64_t)),
+					[this, server](std::error_code ec, size_t length)
+					{
+						if (!ec)
+						{
+							if (m_nOwnerType == owner::server)
+							{
+								if (m_nHandshakeIn == m_nHandshakeCheck)
+								{
+									std::cout << "Client Validated\n";
+									server->OnClientValidated(this->shared_from_this());
+
+									ReadHeader();
+								}
+								else
+								{
+									std::cout << "Client Disconnected (Fail Validation)\n";
+									m_socket.close();
+								}
+							}
+							else
+							{
+								m_nHandshakeOut = scramble(m_nHandshakeIn);
+								WriteValidation();
+							}
+						}
+						else
+						{
+							std::cout << "Client Disconnected (ReadValidation)\n";
+							m_socket.close();
+						}
+					});
+			}
+
 		protected:
 			asio::ip::tcp::socket m_socket;
-
 			asio::io_context& m_asioContext;
-
+			
 			tsqueue<message<T>> m_qMessagesOut;
-
 			tsqueue<owned_message<T>>& m_qMessagesIn;
-
+			
 			message<T> m_msgTemporaryIn;
-
+			
 			owner m_nOwnerType = owner::server;
-
 			uint32_t id = 0;
 
+			uint64_t m_nHandshakeOut = 0;
+			uint64_t m_nHandshakeIn = 0;
+			uint64_t m_nHandshakeCheck = 0;
 		};
 	}
 }

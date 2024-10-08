@@ -71,7 +71,5 @@ int main()
 		server.Update(-1, true);
 	}
 
-
-
 	return 0;
 }
