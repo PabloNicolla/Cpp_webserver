@@ -3,81 +3,83 @@
 
 namespace olc
 {
-  namespace net
-  {
+	namespace net
+	{
 
-    template <typename T>
-    struct message_header
-    {
-      T id{};
-      uint32_t size = 0;
-    };
+		template <typename T>
+		struct message_header
+		{
+			T id{};
+			uint32_t size = 0;
+		};
 
-    template <typename T>
-    struct message
-    {
-      message_header<T> header{};
-      std::vector<uint8_t> body;
+		template <typename T>
+		struct message
+		{
+			message_header<T> header{};
+			std::vector<uint8_t> body;
 
-      size_t size() const
-      {
-        return sizeof(message_header<T>) + body.size();
-      }
+			size_t size() const
+			{
+				return body.size();
+			}
 
-      friend std::ostream& operator << (std::ostream& os, const message<T>& msg)
-      {
-        os << std::format("ID: {} Size: {}", msg.header.id, msg.header.size);
-        return os;
-      }
+			friend std::ostream& operator << (std::ostream& os, const message<T>& msg)
+			{
+				os << "ID:" << int(msg.header.id) << " Size:" << msg.header.size;
+				return os;
+			}
 
-      template<typename DataType>
-      friend message<T>& operator << (message<T>& msg, const DataType& data)
-      {
-        static_assert(std::is_standard_layout<DataType>::value, "Data is too complex to be pushed into vector");
 
-        size_t i = msg.body.size();
+			template<typename DataType>
+			friend message<T>& operator << (message<T>& msg, const DataType& data)
+			{
+				static_assert(std::is_standard_layout<DataType>::value, "Data is too complex to be pushed into vector");
 
-        msg.body.resize(msg.body.size() + sizeof(DataType));
+				size_t i = msg.body.size();
 
-        std::memcpy(msg.body.data() + i, &data, sizeof(DataType));
+				msg.body.resize(msg.body.size() + sizeof(DataType));
 
-        msg.header.size = msg.size();
+				std::memcpy(msg.body.data() + i, &data, sizeof(DataType));
 
-        return msg;
-      }
+				msg.header.size = msg.size();
 
-      template<typename DataType>
-      friend message<T>& operator >> (message<T>& msg, DataType& data)
-      {
-        static_assert(std::is_standard_layout<DataType>::value, "Data is too complex to be pulled from vector");
+				return msg;
+			}
 
-        size_t i = msg.body.size() - sizeof(DataType);
+			template<typename DataType>
+			friend message<T>& operator >> (message<T>& msg, DataType& data)
+			{
+				static_assert(std::is_standard_layout<DataType>::value, "Data is too complex to be pulled from vector");
 
-        std::memcpy(&data, msg.body.data() + i, sizeof(DataType));
+				size_t i = msg.body.size() - sizeof(DataType);
 
-        msg.body.resize(i);
+				std::memcpy(&data, msg.body.data() + i, sizeof(DataType));
 
-        msg.header.size = msg.size();
+				msg.body.resize(i);
 
-        return msg;
-      }
-    };
+				msg.header.size = msg.size();
 
-    template<typename T>
-    class connection;
+				return msg;
+			}
+		};
 
-    template <typename T>
-    struct owned_message
-    {
-      std::shared_ptr<connection<T>> remote = nullptr;
-      message<T> msg;
 
-      friend std::ostream& operator << (std::ostream& os, const owned_message& msg)
-      {
-        os << msg.msg;
-        return os;
-      }
-    };
+		template <typename T>
+		class connection;
 
-  }
+		template <typename T>
+		struct owned_message
+		{
+			std::shared_ptr<connection<T>> remote = nullptr;
+			message<T> msg;
+
+			friend std::ostream& operator<<(std::ostream& os, const owned_message<T>& msg)
+			{
+				os << msg.msg;
+				return os;
+			}
+		};
+
+	}
 }
